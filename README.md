@@ -1,5 +1,5 @@
 # Advent of Code 2022
-![Rust](https://github.com/acemuzzy/aoc2022/actions/workflows/rust.yml/badge.svg)
+![Rust](https://github.com/positronicarts/aoc2022/actions/workflows/rust.yml/badge.svg)
 
 Courtesy of https://adventofcode.com/.
 
