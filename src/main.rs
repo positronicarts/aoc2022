@@ -10,9 +10,7 @@ fn main() {
 
 #[cfg(test)]
 mod test {
-    use super::{
-        day1, day2, Day,
-    };
+    use super::{day1, day2, Day};
 
     #[test]
     fn day1() {
