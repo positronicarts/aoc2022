@@ -1,16 +1,20 @@
 mod day1;
 mod day2;
+mod day3;
+mod day4;
 
 use aoc22::Day;
 
 fn main() {
     // day1::Day1 {}.run();
-    day2::Day2 {}.run();
+    //day2::Day2 {}.run();
+    //day3::Day3 {}.run();
+    day4::Day4 {}.run();
 }
 
 #[cfg(test)]
 mod test {
-    use super::{day1, day2, Day};
+    use super::{day1, day2, day3, day4, Day};
 
     #[test]
     fn day1() {
@@ -20,5 +24,15 @@ mod test {
     #[test]
     fn day2() {
         assert_eq!(day2::Day2 {}.test(), (15, 12));
+    }
+
+    #[test]
+    fn day3() {
+        assert_eq!(day3::Day3 {}.test(), (157, 70));
+    }
+
+    #[test]
+    fn day4() {
+        assert_eq!(day4::Day4 {}.test(), (2, 4));
     }
 }
