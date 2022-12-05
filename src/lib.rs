@@ -12,7 +12,7 @@ pub trait DayInner<T, O> {
 pub trait Day<T, O>
 where
     T: DayInner<T, O>,
-    O: Into<i64>,
+    O: std::fmt::Debug,
 {
     fn run(&self);
     fn test(&self) -> (O, O);
@@ -21,7 +21,7 @@ where
 impl<T, O> Day<T, O> for T
 where
     T: DayInner<T, O>,
-    O: Into<i64> + std::fmt::Debug,
+    O: std::fmt::Debug,
 {
     fn run(&self) {
         let input = get_input_content(self.day(), false);
