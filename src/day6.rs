@@ -6,7 +6,7 @@ fn get_index(line: &str, length: usize) -> usize {
 
     loop {
         let mut set = std::collections::HashSet::<char>::new();
-        for c in chars.iter().take(index + 1).skip(index + 1 - length) {
+        for c in chars.iter().skip(index + 1 - length).take(length) {
             set.insert(*c);
         }
 
