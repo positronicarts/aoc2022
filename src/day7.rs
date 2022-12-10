@@ -9,13 +9,6 @@ enum Command {
     Unknown,
 }
 
-#[derive(Debug)]
-enum LsOutput {
-    Dir(String),
-    File(i64),
-    Unknown,
-}
-
 impl Command {
     fn parse(input: &str) -> Self {
         let cd_re = Regex::new(r"^\$ cd (\S*)$").unwrap();
@@ -30,6 +23,13 @@ impl Command {
             Command::Unknown
         }
     }
+}
+
+#[derive(Debug)]
+enum LsOutput {
+    Dir(String),
+    File(i64),
+    Unknown,
 }
 
 impl LsOutput {
