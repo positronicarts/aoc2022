@@ -37,6 +37,7 @@ impl Monkey {
                 .map(|x| x.parse::<i64>().unwrap())
                 .collect()
         };
+
         let operation_re = Regex::new(r"^  Operation: new = old (\S) (\S+)$").unwrap();
         let next = input.next().unwrap();
         let operation: MonkeyOp = if !operation_re.is_match(next) {
@@ -117,6 +118,7 @@ impl Monkey {
                 self.items[ii] /= 3;
             }
 
+            // Avoid wrapping by working modulo the LCM
             self.items[ii] %= lcm;
 
             let bool = (self.items[ii] % self.test) == 0;
@@ -129,9 +131,38 @@ impl Monkey {
             self.inspection_count += 1;
         }
 
+        // Clear out local vector, given all items are passed elsewhere
         self.items = vec![];
 
         rv
+    }
+
+    fn get_monkey_business(
+        monkeys: &Vec<Self>,
+        divide_by_three: bool,
+        rounds: usize,
+        lcm: i64,
+    ) -> i64 {
+        let mut monkeys = monkeys.to_owned();
+
+        for _ in 0..rounds {
+            for ii in 0..monkeys.len() {
+                let rv = {
+                    let monkey: &mut Monkey = &mut monkeys[ii];
+                    monkey.process(lcm, divide_by_three)
+                };
+
+                for (val, target) in rv {
+                    let target: &mut Monkey = &mut monkeys[target as usize];
+                    target.items.push(val);
+                }
+            }
+        }
+
+        let mut counts: Vec<i64> = monkeys.iter().map(|m| m.inspection_count).collect();
+        counts.sort_unstable();
+        counts.reverse();
+        counts[0] * counts[1]
     }
 }
 
@@ -154,47 +185,12 @@ impl aoc22::DayInner<Day11, i64> for Day11 {
             }
         }
 
+        // Approximate the LCM as the product
         let lcm: i64 = monkeys.iter().map(|m| m.test).product();
-        let mut p2_monkeys = monkeys.clone();
 
-        for _ in 0..20 {
-            for ii in 0..monkeys.len() {
-                let rv = {
-                    let monkey: &mut Monkey = &mut monkeys[ii];
-                    monkey.process(lcm, true)
-                };
-
-                for (val, target) in rv {
-                    let target: &mut Monkey = &mut monkeys[target as usize];
-                    target.items.push(val);
-                }
-            }
-        }
-
-        let mut counts: Vec<i64> = monkeys.iter().map(|m| m.inspection_count).collect();
-        counts.sort_unstable();
-        counts.reverse();
-        let p1 = counts[0] * counts[1];
-
-        for _ in 0..10000 {
-            for ii in 0..p2_monkeys.len() {
-                let rv = {
-                    let monkey: &mut Monkey = &mut p2_monkeys[ii];
-                    monkey.process(lcm, false)
-                };
-
-                for (val, target) in rv {
-                    let target: &mut Monkey = &mut p2_monkeys[target as usize];
-                    target.items.push(val);
-                }
-            }
-        }
-
-        let mut counts: Vec<i64> = p2_monkeys.iter().map(|m| m.inspection_count).collect();
-        counts.sort_unstable();
-        counts.reverse();
-        let p2 = counts[0] * counts[1];
-
-        (p1, p2)
+        (
+            Monkey::get_monkey_business(&monkeys, true, 20, lcm),
+            Monkey::get_monkey_business(&monkeys, false, 10000, lcm),
+        )
     }
 }
