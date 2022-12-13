@@ -2,6 +2,7 @@ mod day1;
 mod day10;
 mod day11;
 mod day12;
+mod day13;
 mod day2;
 mod day3;
 mod day4;
@@ -25,12 +26,15 @@ fn main() {
     // day9::Day9 {}.run();
     // day10::Day10 {}.run();
     // day11::Day11 {}.run();
-    day12::Day12 {}.run();
+    // day12::Day12 {}.run();
+    day13::Day13 {}.run();
 }
 
 #[cfg(test)]
 mod test {
-    use super::{day1, day10, day11, day12, day2, day3, day4, day5, day6, day7, day8, day9, Day};
+    use super::{
+        day1, day10, day11, day12, day13, day2, day3, day4, day5, day6, day7, day8, day9, Day,
+    };
 
     #[test]
     fn day1() {
@@ -93,5 +97,10 @@ mod test {
     #[test]
     fn day12() {
         assert_eq!(day12::Day12 {}.test(), (31, 29));
+    }
+
+    #[test]
+    fn day13() {
+        assert_eq!(day13::Day13 {}.test(), (13, 140));
     }
 }
