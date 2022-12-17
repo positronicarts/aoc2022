@@ -14,8 +14,10 @@ struct Room {
 
 impl Room {
     fn parse(input: &str) -> Self {
-        let re = Regex::new(r"Valve (.*) has flow rate=(\d+); tunnel.* lead.* to valve.{0,1} (.*)")
-            .unwrap();
+        let re = Regex::new(
+            r"Valve (.*) has flow rate=(\d+); tunnel.{0,1} lead.{0,1} to valve.{0,1} (.*)",
+        )
+        .unwrap();
 
         println!("Line {}", input);
         let name = re.captures_iter(input).next().unwrap()[1].to_string();
