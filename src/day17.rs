@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fmt::Debug};
+use std::{collections::HashMap, fmt::Debug, iter::Cycle, slice::Iter};
 
 pub struct Day17;
 
@@ -118,7 +118,45 @@ impl Grid {
         ]
     }
 
-    fn run(directions: &Vec<Direction>, rocks: usize) -> i64 {
+    fn drop(
+        &mut self,
+        pieces: &[Grid],
+        directions_iter: &mut Cycle<Iter<Direction>>,
+        blows: &mut i64,
+        max_height: &mut i64,
+        real_max_height: &mut i64,
+        ii: usize,
+    ) {
+        let mut falling_piece = FallingPiece {
+            shape: pieces[ii % pieces.len()].clone(),
+            location: (
+                3,
+                *max_height as i32 + 4 + pieces[ii % pieces.len()].cells.len() as i32 - 1,
+            ),
+        };
+
+        loop {
+            let next_dir = directions_iter.next().unwrap();
+            falling_piece.try_move(next_dir.to_vector(), self, false);
+            *blows += 1;
+
+            if !falling_piece.try_move(Direction::Down.to_vector(), self, true) {
+                let new_candidate_max_height = falling_piece.location.1 as i64;
+                let extra_rows = new_candidate_max_height - *max_height;
+
+                if extra_rows > 0 {
+                    for _ in 0..extra_rows {
+                        self.add_row();
+                        *max_height += 1;
+                        *real_max_height += 1;
+                    }
+                }
+                break;
+            }
+        }
+    }
+
+    fn run(directions: &[Direction], rocks: usize) -> i64 {
         let mut directions_iter = directions.iter().cycle();
 
         let pieces = Grid::get_pieces();
@@ -132,15 +170,7 @@ impl Grid {
 
         let mut cache: HashMap<(i64, i64, Vec<bool>), (i64, i64)> = HashMap::new();
 
-        'mainloop: for ii in 0..rocks {
-            let mut falling_piece = FallingPiece {
-                shape: pieces[ii % pieces.len()].clone(),
-                location: (
-                    3,
-                    max_height as i32 + 4 + pieces[ii % pieces.len()].cells.len() as i32 - 1,
-                ),
-            };
-
+        for ii in 0..rocks {
             if ii > 0
                 && grid.cells[max_height as usize]
                     .iter()
@@ -149,49 +179,31 @@ impl Grid {
                     > 5
             {
                 // Pretty full row - use a cache to look for effective repeats, as a shortcut to completion
-                if cache.contains_key(&(
+                if let std::collections::hash_map::Entry::Vacant(e) = cache.entry((
                     ii as i64 % pieces.len() as i64,
                     blows as i64 % directions.len() as i64,
                     grid.cells[max_height as usize].clone(),
                 )) {
+                    e.insert((ii as i64, real_max_height));
+                } else {
                     let val = cache[&(
                         ii as i64 % pieces.len() as i64,
                         blows as i64 % directions.len() as i64,
                         grid.cells[max_height as usize].clone(),
                     )];
                     shortcut = Some((ii as i64, val.0, real_max_height - val.1));
-                    break 'mainloop;
-                } else {
-                    cache.insert(
-                        (
-                            ii as i64 % pieces.len() as i64,
-                            blows as i64 % directions.len() as i64,
-                            grid.cells[max_height as usize].clone(),
-                        ),
-                        (ii as i64, real_max_height),
-                    );
-                }
-            }
-
-            loop {
-                let next_dir = directions_iter.next().unwrap();
-                falling_piece.try_move(next_dir.to_vector(), &mut grid, false);
-                blows += 1;
-
-                if !falling_piece.try_move(Direction::Down.to_vector(), &mut grid, true) {
-                    let new_candidate_max_height = falling_piece.location.1 as i64;
-                    let extra_rows = new_candidate_max_height - max_height;
-
-                    if extra_rows > 0 {
-                        for _ in 0..extra_rows {
-                            grid.add_row();
-                            max_height += 1;
-                            real_max_height += 1;
-                        }
-                    }
                     break;
                 }
             }
+
+            grid.drop(
+                &pieces,
+                &mut directions_iter,
+                &mut blows,
+                &mut max_height,
+                &mut real_max_height,
+                ii,
+            );
         }
 
         if let Some(shortcut_inner) = shortcut {
@@ -201,36 +213,20 @@ impl Grid {
             let repeats = left / difference;
             let mut index = shortcut_inner.0;
 
+            // Fast-forward the max number of possible repeats
             real_max_height += repeats * dh;
             index += difference * repeats;
 
+            // Bring it home
             for ii in (index as usize)..rocks {
-                let mut falling_piece = FallingPiece {
-                    shape: pieces[ii % pieces.len()].clone(),
-                    location: (
-                        3,
-                        max_height as i32 + 4 + pieces[ii % pieces.len()].cells.len() as i32 - 1,
-                    ),
-                };
-
-                loop {
-                    let next_dir = directions_iter.next().unwrap();
-                    falling_piece.try_move(next_dir.to_vector(), &mut grid, false);
-                    if !falling_piece.try_move(Direction::Down.to_vector(), &mut grid, true)
-                    {
-                        let new_candidate_max_height = falling_piece.location.1 as i64;
-                        let extra_rows = new_candidate_max_height - max_height;
-
-                        if extra_rows > 0 {
-                            for _ in 0..extra_rows {
-                                grid.add_row();
-                                max_height += 1;
-                                real_max_height += 1;
-                            }
-                        }
-                        break;
-                    }
-                }
+                grid.drop(
+                    &pieces,
+                    &mut directions_iter,
+                    &mut blows,
+                    &mut max_height,
+                    &mut real_max_height,
+                    ii,
+                );
             }
         }
 
