@@ -53,7 +53,7 @@ fn get_file_name(day: i32, test: bool) -> PathBuf {
     path
 }
 
-fn get_file_content(filename: PathBuf) -> String {
+pub fn get_file_content(filename: PathBuf) -> String {
     fs::read_to_string(filename).expect("Something went wrong reading the file")
 }
 
