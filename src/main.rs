@@ -130,6 +130,6 @@ mod test {
 
     #[test]
     fn day17() {
-        assert_eq!(day17::Day17 {}.test(), (3068, 0));
+        assert_eq!(day17::Day17 {}.test(), (3068, 1514285714288));
     }
 }

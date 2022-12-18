@@ -87,50 +87,9 @@ impl Grid {
             }
         }
     }
-}
 
-struct FallingPiece {
-    shape: Grid,
-    location: (i32, i32),
-}
-
-impl FallingPiece {
-    fn try_move(&mut self, dir: (i32, i32), grid: &mut Grid, settle: bool, print: bool) -> bool {
-        let new_location = (self.location.0 + dir.0, self.location.1 + dir.1);
-
-        if print && dir.1 < 0 {
-            println!(
-                "Checking move from {:?} to {:?}",
-                self.location, new_location
-            );
-        }
-
-        let can_move = !grid.overlaps(self, new_location);
-        if can_move {
-            if print {
-                println!("Can move");
-            }
-            self.location = new_location;
-        } else if settle {
-            if print {
-                println!("Settling");
-            }
-            grid.settle(self);
-        }
-        can_move
-    }
-}
-
-impl aoc22::DayInner<Day17, i64> for Day17 {
-    fn day(&self) -> i32 {
-        17
-    }
-
-    fn inner(&self, input: String) -> (i64, i64) {
-        let directions: Vec<Direction> = input.chars().map(Direction::parse).collect();
-        let mut directions_iter = directions.iter().cycle();
-
-        let pieces = vec![
+    fn get_pieces() -> Vec<Grid> {
+        vec![
             Grid {
                 cells: vec![vec![true, true, true, true]],
                 show_char: '@',
@@ -159,7 +118,13 @@ impl aoc22::DayInner<Day17, i64> for Day17 {
                 cells: vec![vec![true, true], vec![true, true]],
                 show_char: '@',
             },
-        ];
+        ]  
+    }
+
+    fn run(directions: &Vec<Direction>, rocks: usize) -> i64 {
+        let mut directions_iter = directions.iter().cycle();
+
+        let pieces = Grid::get_pieces();
 
         let mut grid = Grid::new('#');
         let mut max_height: i64 = 0;
@@ -168,8 +133,8 @@ impl aoc22::DayInner<Day17, i64> for Day17 {
         let mut floor_repeater: Option<(i64, i64, i64)> = None;
         let mut blows = 0;
 
-        let rocks = 2022;
-        let rocks = 1000000000000;
+        // let rocks = 2022;
+        // let rocks = 1000000000000;
 
         let mut dict: HashMap<(i64, i64, Vec<bool>), (i64, i64)> = HashMap::new();
 
@@ -365,11 +330,58 @@ impl aoc22::DayInner<Day17, i64> for Day17 {
                     }
                 }
             }
+            
         }
+
+        real_max_height
+        
+    }
+}
+
+struct FallingPiece {
+    shape: Grid,
+    location: (i32, i32),
+}
+
+impl FallingPiece {
+    fn try_move(&mut self, dir: (i32, i32), grid: &mut Grid, settle: bool, print: bool) -> bool {
+        let new_location = (self.location.0 + dir.0, self.location.1 + dir.1);
+
+        if print && dir.1 < 0 {
+            println!(
+                "Checking move from {:?} to {:?}",
+                self.location, new_location
+            );
+        }
+
+        let can_move = !grid.overlaps(self, new_location);
+        if can_move {
+            if print {
+                println!("Can move");
+            }
+            self.location = new_location;
+        } else if settle {
+            if print {
+                println!("Settling");
+            }
+            grid.settle(self);
+        }
+        can_move
+    }
+}
+
+impl aoc22::DayInner<Day17, i64> for Day17 {
+    fn day(&self) -> i32 {
+        17
+    }
+
+    fn inner(&self, input: String) -> (i64, i64) {
+        let directions: Vec<Direction> = input.chars().map(Direction::parse).collect();
+        
 
         // println!("{:?}", grid);
 
-        (real_max_height, 0)
+        (Grid::run(&directions, 2022), Grid::run(&directions, 1000000000000))
     }
 }
 
